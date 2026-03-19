@@ -2,46 +2,42 @@ use adw::prelude::*;
 use silo_core::browser::BrowserEntry;
 use silo_core::config::{self, BrowserRef, Config, Rule};
 
+/// Returns the picker window so callers can overlay dialogs on it.
 pub fn show(
     app: &adw::Application,
     url: &str,
     domain: Option<&str>,
     browsers: &[BrowserEntry],
     config: &Config,
-) {
+) -> adw::ApplicationWindow {
     let url = url.to_string();
     let domain_str = domain.unwrap_or("").to_string();
 
-    let header = adw::HeaderBar::builder().show_title(false).build();
-
-    let header_label = gtk::Label::builder()
-        .label(if domain_str.is_empty() {
-            "Open in".to_string()
-        } else {
-            format!("Open {} in", domain_str)
-        })
-        .css_classes(["title"])
+    let header = adw::HeaderBar::builder()
+        .show_title(false)
         .build();
 
-    let remember_check = gtk::CheckButton::builder()
-        .label(if domain_str.is_empty() {
-            "Always use for this link".to_string()
-        } else {
-            format!("Always use for {}", domain_str)
-        })
+    let remember_title = if domain_str.is_empty() {
+        "Always use for this link".to_string()
+    } else {
+        format!("Always use for {}", domain_str)
+    };
+    let remember_row = adw::SwitchRow::builder()
+        .title(&remember_title)
         .active(config.remember_choice)
         .build();
 
-    let header_box = gtk::Box::builder()
-        .orientation(gtk::Orientation::Vertical)
-        .spacing(8)
+    let remember_list = gtk::ListBox::builder()
+        .selection_mode(gtk::SelectionMode::None)
+        .css_classes(["boxed-list"])
         .margin_start(12)
         .margin_end(12)
-        .margin_top(8)
-        .margin_bottom(8)
+        .margin_top(4)
+        .margin_bottom(12)
         .build();
-    header_box.append(&header_label);
-    header_box.append(&remember_check);
+    remember_list.append(&remember_row);
+
+    remember_list.set_cursor_from_name(Some("pointer"));
 
     let list_box = gtk::ListBox::builder()
         .selection_mode(gtk::SelectionMode::Single)
@@ -83,24 +79,31 @@ pub fn show(
     let content_box = gtk::Box::builder()
         .orientation(gtk::Orientation::Vertical)
         .build();
-    content_box.append(&header_box);
+    content_box.append(&remember_list);
     content_box.append(&scrolled);
 
     let toolbar = adw::ToolbarView::new();
     toolbar.add_top_bar(&header);
     toolbar.set_content(Some(&content_box));
 
+    let (default_w, default_h) = config
+        .picker_size
+        .as_ref()
+        .map(|s| (s.width, s.height))
+        .unwrap_or((450, 500));
+
     let window = adw::ApplicationWindow::builder()
         .application(app)
         .content(&toolbar)
-        .default_width(400)
-        .default_height(500)
+        .title("Silo")
+        .default_width(default_w)
+        .default_height(default_h)
         .build();
 
     let browsers_clone = browsers.to_vec();
     let url_clone = url.clone();
     let domain_clone = domain_str.clone();
-    let remember_ref = remember_check.clone();
+    let remember_ref = remember_row.clone();
     let window_ref = window.clone();
 
     list_box.connect_row_activated(move |_, row| {
@@ -127,7 +130,7 @@ pub fn show(
     let browsers_for_keys = browsers.to_vec();
     let url_for_keys = url.clone();
     let domain_for_keys = domain_str.clone();
-    let remember_for_keys = remember_check.clone();
+    let remember_for_keys = remember_row.clone();
     let window_for_keys = window.clone();
 
     key_controller.connect_key_pressed(move |_, keyval, _, _| {
@@ -168,22 +171,29 @@ pub fn show(
 
     window.add_controller(key_controller);
 
-    // close on focus loss
-    let window_for_focus = window.clone();
-    window.connect_is_active_notify(move |win| {
-        if !win.is_active() {
-            window_for_focus.close();
+    window.connect_close_request(|win| {
+        let mut config = config::load();
+        let (w, h) = win.default_size();
+        config.picker_size = Some(silo_core::config::WindowSize {
+            width: w,
+            height: h,
+        });
+        if let Err(e) = config::save(&config) {
+            eprintln!("silo: failed to save config: {e}");
         }
+        gtk::glib::Propagation::Proceed
     });
 
     window.present();
+
+    window
 }
 
-fn save_choice(remember_check: &gtk::CheckButton, domain: &str, entry: &BrowserEntry) {
+fn save_choice(remember_row: &adw::SwitchRow, domain: &str, entry: &BrowserEntry) {
     let mut config = config::load();
-    config.remember_choice = remember_check.is_active();
+    config.remember_choice = remember_row.is_active();
 
-    if remember_check.is_active() && !domain.is_empty() {
+    if remember_row.is_active() && !domain.is_empty() {
         let new_rule = Rule {
             domain: domain.to_string(),
             browser: BrowserRef {

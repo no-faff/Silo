@@ -118,8 +118,8 @@ pub fn show_error_dialog(app: &adw::Application, heading: &str, body: &str) {
     let window = adw::ApplicationWindow::builder()
         .application(app)
         .title("Silo")
-        .default_width(1)
-        .default_height(1)
+        .default_width(360)
+        .default_height(200)
         .build();
     window.present();
 

@@ -15,6 +15,12 @@ pub struct Rule {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct WindowSize {
+    pub width: i32,
+    pub height: i32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Config {
     #[serde(default)]
     pub always_ask: bool,
@@ -26,6 +32,8 @@ pub struct Config {
     pub previous_default_browser: Option<String>,
     #[serde(default)]
     pub rules: Vec<Rule>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub picker_size: Option<WindowSize>,
 }
 
 impl Default for Config {
@@ -37,6 +45,7 @@ impl Default for Config {
             fallback_browser: None,
             previous_default_browser: None,
             rules: Vec::new(),
+            picker_size: None,
         }
     }
 }
@@ -119,6 +128,7 @@ mod tests {
                     args: Some("--profile-directory=Profile 1".to_string()),
                 },
             }],
+            picker_size: None,
         };
         let json = serde_json::to_string_pretty(&config).unwrap();
         let parsed: Config = serde_json::from_str(&json).unwrap();
@@ -153,6 +163,7 @@ mod tests {
                     args: None,
                 },
             }],
+            picker_size: None,
         };
 
         save_to(&config, &path).unwrap();
