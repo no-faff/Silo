@@ -58,7 +58,8 @@ cd silo-1.0.0
 ```
 
 This copies the binary to `~/.local/bin/` and installs the `.desktop`
-file. Run `silo` to set it as your default browser.
+file. Launch Silo from your app launcher or run `silo` in a terminal.
+It will ask to set itself as your default browser.
 
 ## Uninstalling
 
