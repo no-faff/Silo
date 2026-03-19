@@ -37,7 +37,20 @@ fn on_command_line(
     });
 
     match url {
-        Some(url) => handle_url(app, url),
+        Some(url) => {
+            if app.windows().is_empty() {
+                // fresh launch, handle immediately
+                handle_url(app, url);
+            } else {
+                // D-Bus activation while already running, defer to
+                // avoid focus issues with existing windows
+                let app = app.clone();
+                let url = url.clone();
+                gtk::glib::idle_add_local_once(move || {
+                    handle_url(&app, &url);
+                });
+            }
+        }
         None => show_settings_or_first_run(app, None),
     }
 
@@ -56,6 +69,13 @@ fn show_settings_or_first_run(app: &adw::Application, then_url: Option<String>) 
 }
 
 fn handle_url(app: &adw::Application, url: &str) {
+    // close any existing picker windows (but not the settings PreferencesWindow)
+    for win in app.windows() {
+        if win.downcast_ref::<adw::PreferencesWindow>().is_none() {
+            win.destroy();
+        }
+    }
+
     if !silo_core::config::exists() {
         crate::first_run::show(app, Some(url.to_string()));
         return;
