@@ -314,13 +314,13 @@ pub fn show(app: &adw::Application, config: &Config, browsers: &[BrowserEntry]) 
 
     let always_ask_row = adw::SwitchRow::builder()
         .title("Always ask")
-        .subtitle("Show picker for every link without a rule")
+        .subtitle("Show the picker every time, even if no rule matches")
         .active(config.always_ask)
         .build();
 
     let fallback_row = adw::ComboRow::builder()
         .title("Fallback browser")
-        .subtitle("Used when no rule matches and 'Always ask' is off")
+        .subtitle("When 'Always ask' is off, links without a matching rule open here silently")
         .build();
 
     let browser_names: Vec<String> = std::iter::once("None".to_string())
@@ -342,7 +342,9 @@ pub fn show(app: &adw::Application, config: &Config, browsers: &[BrowserEntry]) 
             fallback_row.set_selected(pos as u32 + 1);
         }
 
-    let behaviour_group = adw::PreferencesGroup::new();
+    let behaviour_group = adw::PreferencesGroup::builder()
+        .description("Links matching a rule always open in the assigned browser. For everything else, Silo either shows the picker or sends the link to your fallback browser.")
+        .build();
     behaviour_group.add(&always_ask_row);
     behaviour_group.add(&fallback_row);
     behaviour_page.add(&behaviour_group);
