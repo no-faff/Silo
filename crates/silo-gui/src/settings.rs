@@ -933,6 +933,11 @@ pub fn show(app: &adw::Application, config: &Config, browsers: &[BrowserEntry]) 
 
     let browsers_clone = browsers.to_vec();
     window.connect_close_request(move |_| {
+        // Don't recreate the config if it was just deleted (uninstall)
+        if !config::exists() {
+            return gtk::glib::Propagation::Proceed;
+        }
+
         let mut config = config::load();
         config.always_ask = always_ask_row.is_active();
 
