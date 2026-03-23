@@ -6,8 +6,6 @@
 
 **A browser picker for Linux. Click a link, pick which browser opens it.**
 
-Part of the [No Faff](https://github.com/no-faff) suite.
-
 You have a work browser and a personal browser. Or you use different
 profiles for different things. You click a link in an email and it
 opens in the wrong one. Now you have to copy the URL, switch browsers,
