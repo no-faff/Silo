@@ -342,15 +342,8 @@ pub fn show_on_page(
 
     // -- setup --
 
-    let current_default_desktop = std::process::Command::new("xdg-settings")
-        .args(["get", "default-web-browser"])
-        .output()
-        .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .map(|s| s.trim().to_string())
-        .unwrap_or_default();
-
-    let is_default = current_default_desktop == "com.nofaff.Silo.desktop";
+    let current_default_desktop = silo_core::register::get_default_browser();
+    let is_default = silo_core::register::is_silo_default();
 
     let setup_description = if is_default {
         "Silo is intercepting your links.".to_string()
@@ -1152,13 +1145,7 @@ pub fn show_on_page(
         }
 
         // Check if Silo is now the default browser
-        let now_default = std::process::Command::new("xdg-settings")
-            .args(["get", "default-web-browser"])
-            .output()
-            .map(|o| String::from_utf8_lossy(&o.stdout).trim() == "com.nofaff.Silo.desktop")
-            .unwrap_or(false);
-
-        if now_default {
+        if silo_core::register::is_silo_default() {
             return gtk::glib::Propagation::Proceed;
         }
 

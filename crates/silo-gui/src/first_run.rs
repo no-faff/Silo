@@ -6,13 +6,12 @@ pub fn show(app: &adw::Application, url: Option<String>) {
     let browsers = silo_core::browser::discover();
 
     // Record the current default browser before we replace it
-    let previous = std::process::Command::new("xdg-settings")
-        .args(["get", "default-web-browser"])
-        .output()
-        .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .map(|s| s.trim().to_string())
-        .filter(|s| !s.is_empty() && s != "com.nofaff.Silo.desktop");
+    let current = silo_core::register::get_default_browser();
+    let previous = if current.is_empty() || current == "com.nofaff.Silo.desktop" {
+        None
+    } else {
+        Some(current)
+    };
 
     // Save a default config with the previous browser recorded.
     let default_config = config::Config {

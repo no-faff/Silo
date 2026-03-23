@@ -324,7 +324,7 @@ fn expand_entry(de: &desktop::DesktopEntry, entries: &mut Vec<BrowserEntry>) {
                             desktop_file: de.id.clone(),
                             display_name: format!("{} - {}", de.name, name),
                             icon: de.icon.clone(),
-                            profile_args: Some(format!("'--profile-directory={dir}'")),
+                            profile_args: Some(format!("--profile-directory={}", shlex::try_quote(&dir).unwrap_or(std::borrow::Cow::Borrowed(&dir)))),
                             exec: de.exec.clone(),
                         });
                     }
@@ -346,7 +346,7 @@ fn expand_entry(de: &desktop::DesktopEntry, entries: &mut Vec<BrowserEntry>) {
                             desktop_file: de.id.clone(),
                             display_name: format!("{} - {}", de.name, display_name),
                             icon: de.icon.clone(),
-                            profile_args: Some(format!("-P '{profile_name}'")),
+                            profile_args: Some(format!("-P {}", shlex::try_quote(&profile_name).unwrap_or(std::borrow::Cow::Borrowed(&profile_name)))),
                             exec: de.exec.clone(),
                         });
                     }

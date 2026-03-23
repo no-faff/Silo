@@ -1,7 +1,31 @@
 use std::path::PathBuf;
 use std::process::Command;
+use std::time::Duration;
 
 const DESKTOP_FILENAME: &str = "com.nofaff.Silo.desktop";
+
+/// Queries xdg-settings for the current default browser with a 3-second
+/// timeout. Returns the .desktop file ID or an empty string on failure.
+pub fn get_default_browser() -> String {
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let result = Command::new("xdg-settings")
+            .args(["get", "default-web-browser"])
+            .output()
+            .ok()
+            .and_then(|o| String::from_utf8(o.stdout).ok())
+            .map(|s| s.trim().to_string())
+            .unwrap_or_default();
+        let _ = tx.send(result);
+    });
+
+    rx.recv_timeout(Duration::from_secs(3)).unwrap_or_default()
+}
+
+/// Returns true if Silo is currently the default browser.
+pub fn is_silo_default() -> bool {
+    get_default_browser() == DESKTOP_FILENAME
+}
 const ICON_BYTES: &[u8] = include_bytes!("../../../data/icons/hicolor/128x128/apps/com.nofaff.Silo.png");
 
 fn desktop_install_path() -> PathBuf {
@@ -118,13 +142,12 @@ pub fn install_desktop_file() -> Result<(), String> {
 pub fn set_default_browser() -> Result<Option<String>, String> {
     install_desktop_file()?;
 
-    let previous = Command::new("xdg-settings")
-        .args(["get", "default-web-browser"])
-        .output()
-        .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .map(|s| s.trim().to_string())
-        .filter(|s| !s.is_empty() && s != DESKTOP_FILENAME);
+    let current = get_default_browser();
+    let previous = if current.is_empty() || current == DESKTOP_FILENAME {
+        None
+    } else {
+        Some(current)
+    };
 
     let status = Command::new("xdg-settings")
         .args(["set", "default-web-browser", DESKTOP_FILENAME])
@@ -198,13 +221,7 @@ pub fn uninstall() -> Result<(), String> {
     let config = crate::config::load();
 
     // restore previous default browser
-    let current = Command::new("xdg-settings")
-        .args(["get", "default-web-browser"])
-        .output()
-        .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .map(|s| s.trim().to_string())
-        .unwrap_or_default();
+    let current = get_default_browser();
 
     if current == DESKTOP_FILENAME {
         // Try the recorded previous browser, otherwise find any installed browser
