@@ -31,6 +31,8 @@ fi
 
 rm -f "${INSTALL_DIR}/${BINARY_NAME}"
 rm -f "${DESKTOP_DIR}/${DESKTOP_FILE}"
+rm -rf "${HOME}/.local/lib/silo"
+rm -f "${HOME}/.mozilla/native-messaging-hosts/com.nofaff.silo.json"
 update-desktop-database "${DESKTOP_DIR}" 2>/dev/null || true
 
 # ask before deleting config

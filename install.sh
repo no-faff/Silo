@@ -5,6 +5,8 @@ BINARY_NAME="silo"
 DESKTOP_FILE="com.nofaff.Silo.desktop"
 INSTALL_DIR="${HOME}/.local/bin"
 DESKTOP_DIR="${HOME}/.local/share/applications"
+HOST_LIB_DIR="${HOME}/.local/lib/silo"
+FIREFOX_NMH_DIR="${HOME}/.mozilla/native-messaging-hosts"
 
 echo "Installing Silo..."
 
@@ -38,6 +40,20 @@ fi
 
 # Update desktop database
 update-desktop-database "${DESKTOP_DIR}" 2>/dev/null || true
+
+# Install native messaging host for browser extensions
+HOST_SRC="native-host/silo-host.py"
+FIREFOX_MANIFEST_SRC="native-host/com.nofaff.silo.firefox.json"
+if [ -f "${HOST_SRC}" ] && [ -f "${FIREFOX_MANIFEST_SRC}" ]; then
+    mkdir -p "${HOST_LIB_DIR}"
+    cp "${HOST_SRC}" "${HOST_LIB_DIR}/silo-host.py"
+    chmod +x "${HOST_LIB_DIR}/silo-host.py"
+
+    mkdir -p "${FIREFOX_NMH_DIR}"
+    sed "s|SILO_HOST_PATH|${HOST_LIB_DIR}/silo-host.py|" \
+        "${FIREFOX_MANIFEST_SRC}" > "${FIREFOX_NMH_DIR}/com.nofaff.silo.json"
+    echo "Installed native messaging host for Firefox"
+fi
 
 echo "Installed to ${INSTALL_DIR}/${BINARY_NAME}"
 
