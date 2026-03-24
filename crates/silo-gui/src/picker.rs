@@ -2,6 +2,46 @@ use adw::prelude::*;
 use silo_core::browser::BrowserEntry;
 use silo_core::config::{self, BrowserRef, Config, Rule};
 
+static CSS_INIT: std::sync::Once = std::sync::Once::new();
+
+fn load_picker_css() {
+    CSS_INIT.call_once(|| {
+        let provider = gtk::CssProvider::new();
+        provider.load_from_string(
+            ".picker-btn { \
+                min-width: 56px; \
+                min-height: 24px; \
+                padding: 2px 10px; \
+                border-radius: 14px; \
+                font-weight: 400; \
+            } \
+            .once-btn { \
+                background: alpha(@accent_color, 0.12); \
+                color: alpha(@accent_color, 0.85); \
+            } \
+            .once-btn:hover { \
+                background: alpha(@accent_color, 0.25); \
+                color: @accent_color; \
+            } \
+            .always-btn { \
+                background: alpha(@error_color, 0.1); \
+                color: alpha(@error_color, 0.7); \
+            } \
+            .always-btn:hover { \
+                background: alpha(@error_color, 0.22); \
+                color: alpha(@error_color, 0.9); \
+            }"
+        );
+        if let Some(display) = gtk::gdk::Display::default() {
+            gtk::style_context_add_provider_for_display(
+                &display,
+                &provider,
+                gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+            );
+        }
+    });
+}
+
 /// Returns the picker window so callers can overlay dialogs on it.
 pub fn show(
     app: &adw::Application,
@@ -12,6 +52,8 @@ pub fn show(
     was_redirected: bool,
     office_doc: Option<silo_core::url::OfficeDocType>,
 ) -> adw::ApplicationWindow {
+    load_picker_css();
+
     let url = url.to_string();
     let domain_str = domain.unwrap_or("").to_string();
 
@@ -79,7 +121,7 @@ pub fn show(
 
     if !domain_str.is_empty() {
         let hint_label = gtk::Label::builder()
-            .label("Choose a browser or click Always to remember. Esc to close.")
+            .label("Choose a browser. Esc to close.")
             .css_classes(["dim-label", "caption"])
             .margin_top(6)
             .build();
@@ -93,8 +135,9 @@ pub fn show(
         .css_classes(["boxed-list"])
         .build();
 
-    let show_always = !domain_str.is_empty();
+    let show_buttons = !domain_str.is_empty();
     let mut always_buttons: Vec<gtk::Button> = Vec::new();
+    let mut once_buttons: Vec<gtk::Button> = Vec::new();
 
     for (i, entry) in browsers.iter().enumerate() {
         let shortcut = match i {
@@ -112,16 +155,25 @@ pub fn show(
         icon.set_pixel_size(32);
         row.add_prefix(&icon);
 
-        if show_always {
+        if show_buttons {
             let always_btn = gtk::Button::builder()
                 .label("Always")
-                .css_classes(["caption"])
+                .css_classes(["picker-btn", "always-btn"])
                 .valign(gtk::Align::Center)
                 .tooltip_text(&format!("Always open {} in {}", domain_str, entry.display_name))
                 .build();
 
+            let once_btn = gtk::Button::builder()
+                .label("Once")
+                .css_classes(["picker-btn", "once-btn"])
+                .valign(gtk::Align::Center)
+                .tooltip_text(&format!("Open in {}", entry.display_name))
+                .build();
+
             row.add_suffix(&always_btn);
+            row.add_suffix(&once_btn);
             always_buttons.push(always_btn);
+            once_buttons.push(once_btn);
         }
 
         if !shortcut.is_empty() {
@@ -191,7 +243,30 @@ pub fn show(
         }
     });
 
-    // -- wire up "Always" buttons now that the window exists --
+    // -- wire up "Once" buttons --
+
+    for (i, btn) in once_buttons.into_iter().enumerate() {
+        let entry = browsers[i].clone();
+        let url_for_btn = url.clone();
+        let win_for_btn = window.clone();
+
+        btn.connect_clicked(move |_| {
+            save_window_size(&win_for_btn);
+
+            if let Err(e) = silo_core::launcher::launch(&entry, &url_for_btn) {
+                let dialog = adw::AlertDialog::builder()
+                    .heading("Failed to open browser")
+                    .body(&e)
+                    .build();
+                dialog.add_responses(&[("close", "Dismiss")]);
+                dialog.present(Some(&win_for_btn));
+                return;
+            }
+            win_for_btn.close();
+        });
+    }
+
+    // -- wire up "Always" buttons --
 
     for (i, btn) in always_buttons.into_iter().enumerate() {
         let entry = browsers[i].clone();
