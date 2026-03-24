@@ -189,7 +189,8 @@ pub fn discover() -> Vec<BrowserEntry> {
             let path = entry.path();
             if path.extension().is_some_and(|e| e == "desktop")
                 && let Some(de) = desktop::parse(&path)
-                    && de.is_browser() && seen_ids.insert(de.id.clone()) {
+                    && de.is_browser() && de.id != "com.nofaff.Silo.desktop"
+                    && seen_ids.insert(de.id.clone()) {
                         expand_entry(&de, &mut entries);
                     }
         }

@@ -156,7 +156,7 @@ pub fn show(
         .picker_size
         .as_ref()
         .map(|s| (s.width, s.height))
-        .unwrap_or((450, 580));
+        .unwrap_or((450, 614));
 
     let window = adw::ApplicationWindow::builder()
         .application(app)
