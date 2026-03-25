@@ -53,11 +53,19 @@ your chosen browser next time with no popup.
 | Custom browsers | Yes | Partial | Yes | Yes | Yes |
 | Hide browsers/profiles | Yes | No | Yes | No | Yes |
 | Reorder picker list | Yes | No | No | No | Yes |
+| Firefox containers | Via [Multi-Account Containers](https://addons.mozilla.org/firefox/addon/multi-account-containers/) | No | No | No | Yes |
 | Native UI | GTK4/libadwaita | GTK4 | GTK3 | Avalonia | WPF |
 | Licence | MIT | GPLv3 | MIT | Paid | MIT |
 
 Silo is the only free, open-source Linux picker with automatic profile
 detection across all Chromium and Firefox-family browsers.
+
+**Firefox containers:** If you use Firefox's Multi-Account Containers
+extension and have set sites to always open in a specific container,
+those assignments work automatically when Silo opens a URL in Firefox.
+The only thing Silo doesn't do yet is let you choose a container on the
+fly in the picker for one-off cases. BrowserPicker supports this via the
+"Open URL in Container" extension.
 
 ## Profile detection
 
