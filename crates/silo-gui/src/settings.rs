@@ -48,7 +48,8 @@ fn build_rules_group(
     let all_browsers = silo_core::browser::discover();
     let stale_rules = silo_core::rule::find_stale_rules(&config.rules, &all_browsers);
 
-    for rule in &config.rules {
+    let rule_count = config.rules.len();
+    for (idx, rule) in config.rules.iter().enumerate() {
         let is_stale = stale_rules.iter().any(|s| std::ptr::eq(*s, rule));
 
         let browser_name = match &rule.browser {
@@ -107,6 +108,58 @@ fn build_rules_group(
         row.connect_activated(move |_| {
             show_add_rule_dialog(&window_for_edit, &browsers_for_edit, Some(&rule_for_edit));
         });
+
+        // Move up
+        let up_btn = gtk::Button::builder()
+            .icon_name("go-up-symbolic")
+            .css_classes(["flat", "reorder-btn"])
+            .valign(gtk::Align::Center)
+            .tooltip_text("Move up (higher priority)")
+            .sensitive(idx > 0)
+            .build();
+
+        if idx > 0 {
+            let move_idx = idx;
+            let app_ref = window.application().and_downcast::<adw::Application>().unwrap();
+            let win_ref = window.clone();
+            up_btn.connect_clicked(move |_| {
+                let mut config = config::load();
+                config.rules.swap(move_idx, move_idx - 1);
+                if let Err(e) = config::save(&config) {
+                    eprintln!("silo: failed to save config: {e}");
+                }
+                win_ref.close();
+                let browsers = silo_core::browser::discover_with_config(&config);
+                show_on_page(&app_ref, &config, &browsers, Some("rules"));
+            });
+        }
+        row.add_suffix(&up_btn);
+
+        // Move down
+        let down_btn = gtk::Button::builder()
+            .icon_name("go-down-symbolic")
+            .css_classes(["flat", "reorder-btn"])
+            .valign(gtk::Align::Center)
+            .tooltip_text("Move down (lower priority)")
+            .sensitive(idx < rule_count - 1)
+            .build();
+
+        if idx < rule_count - 1 {
+            let move_idx = idx;
+            let app_ref = window.application().and_downcast::<adw::Application>().unwrap();
+            let win_ref = window.clone();
+            down_btn.connect_clicked(move |_| {
+                let mut config = config::load();
+                config.rules.swap(move_idx, move_idx + 1);
+                if let Err(e) = config::save(&config) {
+                    eprintln!("silo: failed to save config: {e}");
+                }
+                win_ref.close();
+                let browsers = silo_core::browser::discover_with_config(&config);
+                show_on_page(&app_ref, &config, &browsers, Some("rules"));
+            });
+        }
+        row.add_suffix(&down_btn);
 
         row.add_suffix(&delete_btn);
         rules_group.add(&row);

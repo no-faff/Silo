@@ -52,7 +52,7 @@ your chosen browser next time with no popup.
 | Safety check | Google Transparency Report | No | No | No | No |
 | Custom browsers | Yes | Partial | Yes | Yes | Yes |
 | Hide browsers/profiles | Yes | No | Yes | No | Yes |
-| Reorder picker list | No | No | No | No | Yes |
+| Reorder picker list | Yes | No | No | No | Yes |
 | Native UI | GTK4/libadwaita | GTK4 | GTK3 | Avalonia | WPF |
 | Licence | MIT | GPLv3 | MIT | Paid | MIT |
 
