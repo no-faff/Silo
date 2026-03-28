@@ -191,9 +191,10 @@ The only network request Silo ever makes is if you explicitly click
 in your browser. Silo itself does not contact Google or any other
 service.
 
-When Silo unwraps a tracking redirect, it opens the real URL directly
-in your browser. Microsoft's SafeLinks server or Google's redirect
-service never finds out you clicked the link.
+When a link has been wrapped by a tracking service (like Outlook
+SafeLinks or Google redirects), Silo strips the wrapper and opens
+the real URL directly. The tracking service never finds out you
+clicked the link.
 
 ## Compatibility
 
