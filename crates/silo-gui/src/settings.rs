@@ -310,15 +310,59 @@ fn show_add_custom_browser_dialog(window: &adw::PreferencesWindow) {
         .title("Command")
         .build();
 
+    let browse_btn = gtk::Button::builder()
+        .icon_name("document-open-symbolic")
+        .tooltip_text("Browse for executable")
+        .css_classes(["flat"])
+        .valign(gtk::Align::Center)
+        .build();
+
+    let command_for_browse = command_row.clone();
+    let name_for_browse = name_row.clone();
+    let window_for_browse = window.clone();
+    browse_btn.connect_clicked(move |_| {
+        let file_dialog = gtk::FileDialog::builder()
+            .title("Choose browser executable")
+            .build();
+
+        let cmd_ref = command_for_browse.clone();
+        let name_ref = name_for_browse.clone();
+        file_dialog.open(Some(&window_for_browse), gtk::gio::Cancellable::NONE, move |result| {
+            if let Ok(file) = result
+                && let Some(path) = file.path() {
+                    let path_str = path.to_string_lossy().to_string();
+                    cmd_ref.set_text(&path_str);
+                    // Auto-fill name from filename if empty
+                    if name_ref.text().trim().is_empty() {
+                        if let Some(stem) = path.file_stem() {
+                            let raw = stem.to_string_lossy();
+                            // Strip version-like suffixes (e.g. "helium-0.10.7.1-x86_64" -> "Helium")
+                            let name = raw.split('-')
+                                .next()
+                                .unwrap_or(&raw);
+                            let mut chars = name.chars();
+                            let capitalised: String = match chars.next() {
+                                Some(c) => c.to_uppercase().to_string() + chars.as_str(),
+                                None => String::new(),
+                            };
+                            name_ref.set_text(&capitalised);
+                        }
+                    }
+                }
+        });
+    });
+    command_row.add_suffix(&browse_btn);
+
     let args_row = adw::EntryRow::builder()
         .title("Arguments (optional)")
         .build();
 
     let hint = gtk::Label::builder()
-        .label("e.g. /usr/bin/qutebrowser")
+        .label("Full path to the browser, e.g. /usr/bin/qutebrowser or ~/Apps/browser.AppImage")
         .css_classes(["dim-label", "caption"])
         .halign(gtk::Align::Start)
         .margin_top(8)
+        .wrap(true)
         .build();
 
     let content = gtk::ListBox::builder()
@@ -338,6 +382,7 @@ fn show_add_custom_browser_dialog(window: &adw::PreferencesWindow) {
 
     let dialog = adw::AlertDialog::builder()
         .heading("Add custom browser")
+        .body("For browsers not detected automatically, such as AppImages or portable builds.")
         .extra_child(&outer)
         .build();
     dialog.add_responses(&[("cancel", "Cancel"), ("add", "Add")]);
