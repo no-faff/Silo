@@ -7,36 +7,48 @@
 - The release download contains the built `silo` program and its
   install script. The 1.2.0 download had only GitHub's source code
   archives, so installing it meant building Silo first.
+- The About page shows the release's own version number. The 1.2.0
+  build showed 1.1.0.
 
 ### Changed
 
 - The add custom browser dialog has a button to choose the program
   file, fills in the name from the file name and says when a custom
   browser is needed. Its hint mentions AppImages.
-- Dependencies updated.
+- Silo builds against one copy of the GLib library, the one GTK uses.
+- Dependencies: serde 1.0.229, serde_json 1.0.151, configparser 3.3.0
+  and dirs 7.0.0.
+- Code tidied to Rust's clippy lints: `Config` derives its defaults,
+  and nested `if` blocks in the browser name cleaner, picker and
+  settings are collapsed.
+- The repository runs GitHub's CodeQL code scanning and Dependabot
+  dependency checks.
 
 ## 1.2.0
 
 **Local files**
 - Silo handles local file paths and `file://` links, for example from
-  VS Code's "Open in External App". The picker shows the file type, and
-  an `ext:` rule pattern picks a browser per file type
+  VS Code's "Open in External App". A file path opens the picker
+  rather than the settings window, the picker shows the file type,
+  and an `ext:` rule pattern picks a browser per file type
 
 **Picker**
-- Once and Always buttons: open a link just this once, or save a rule
-  for that site
+- Once and Always buttons on every row: open a link just this once,
+  or save a rule for that site. Clicking the row itself opens it once
 - The picker does not list Silo itself
 - The picker opens tall enough for nine browsers
 
 **Settings**
 - Arrow buttons on the Browsers tab set the order of the picker list
-- Rules can be reordered, and the first match wins
+- Arrow buttons on the Rules tab set rule priority, and the first
+  match wins
 - Browser names drop a trailing "Web Browser" or "Browser", so "Brave
   Browser" shows as "Brave"
 
 **Browser extension**
 - The install script sets up a helper that lets the Silo Firefox
-  extension hand links straight to Silo
+  extension hand links straight to Silo, and the uninstall script
+  removes it
 
 ## 1.1.0
 
