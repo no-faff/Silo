@@ -2,42 +2,41 @@
 
 ## 1.2.1
 
-A maintenance release. The main fix is that the release now includes
-the ready-built program again: the 1.2.0 release only had GitHub's
-source code archives, so there was nothing to install without building
-Silo yourself.
+### Fixed
 
-- Release download includes the built `silo` binary and install script
-- Clearer "add custom browser" dialog
-- Removed an unused duplicate copy of the GLib library from the build
-- Dependency updates (serde, serde_json, configparser, dirs)
-- Automated security scanning (CodeQL) and dependency update checks
-  (Dependabot) on the repository
-- Small code tidy-ups, no change in behaviour
+- The release download contains the built `silo` program and its
+  install script. The 1.2.0 download had only GitHub's source code
+  archives, so installing it meant building Silo first.
+
+### Changed
+
+- The add custom browser dialog has a button to choose the program
+  file, fills in the name from the file name and says when a custom
+  browser is needed. Its hint mentions AppImages.
+- Dependencies updated.
 
 ## 1.2.0
 
 **Local files**
-- Silo now handles local file paths and `file://` links (for example
-  from VS Code's "Open in External App"). The picker shows the file
-  type, and a new `ext:` rule pattern lets you pick a browser per file
-  type
+- Silo handles local file paths and `file://` links, for example from
+  VS Code's "Open in External App". The picker shows the file type, and
+  an `ext:` rule pattern picks a browser per file type
 
 **Picker**
 - Once and Always buttons: open a link just this once, or save a rule
   for that site
-- Silo no longer lists itself as a browser option
-- Default picker height fits nine rows
+- The picker does not list Silo itself
+- The picker opens tall enough for nine browsers
 
 **Settings**
-- Reorder browsers with the arrow buttons
-- Reorder rules to control which one matches first
-- Browser name suffixes are tidied up
+- Arrow buttons on the Browsers tab set the order of the picker list
+- Rules can be reordered, and the first match wins
+- Browser names drop a trailing "Web Browser" or "Browser", so "Brave
+  Browser" shows as "Brave"
 
 **Browser extension**
 - The install script sets up a helper that lets the Silo Firefox
-  extension talk to Silo directly, rather than relying on the system's
-  default browser setting
+  extension hand links straight to Silo
 
 ## 1.1.0
 
