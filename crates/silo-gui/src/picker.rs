@@ -215,7 +215,7 @@ pub fn show(
         .picker_size
         .as_ref()
         .map(|s| (s.width, s.height))
-        .unwrap_or((450, 614));
+        .unwrap_or((600, 614));
 
     let window = adw::ApplicationWindow::builder()
         .application(app)
@@ -346,16 +346,32 @@ pub fn show(
 
     window.add_controller(key_controller);
 
-    // Auto-close when picker loses focus (user clicked elsewhere)
-    window.connect_notify_local(Some("is-active"), move |win, _| {
-        if !win.is_active() {
-            win.close();
-        }
-    });
-
     // modal so it takes focus even when settings is open behind
     window.set_modal(true);
     window.present();
+
+    // Close when another window takes focus. This watches the toplevel's
+    // FOCUSED state rather than the window's is-active property: dragging
+    // a resize edge clears is-active for the length of the drag while the
+    // toplevel keeps FOCUSED, so is-active would close the picker the
+    // moment its edge is grabbed.
+    if let Some(toplevel) = window
+        .surface()
+        .and_then(|s| s.downcast::<gtk::gdk::Toplevel>().ok())
+    {
+        let window_for_focus = window.clone();
+        let had_focus = std::cell::Cell::new(false);
+        toplevel.connect_notify_local(Some("state"), move |toplevel, _| {
+            let focused = toplevel
+                .state()
+                .contains(gtk::gdk::ToplevelState::FOCUSED);
+            if focused {
+                had_focus.set(true);
+            } else if had_focus.get() {
+                window_for_focus.close();
+            }
+        });
+    }
 
     window
 }
