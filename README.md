@@ -130,8 +130,8 @@ Download the [latest release](../../releases/latest), extract and run
 the install script:
 
 ```bash
-tar xzf silo-1.2.1-linux-x86_64.tar.gz
-cd silo-1.2.1
+tar xzf silo-1.2.2-linux-x86_64.tar.gz
+cd silo-1.2.2
 ./install.sh
 ```
 

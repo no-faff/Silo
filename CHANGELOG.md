@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.2
+
+### Fixed
+
+- The picker stays open while its edge is dragged to resize it, and
+  closes when another window takes focus. Grabbing the edge closed the
+  picker before it could resize, so a picker that had become too wide
+  could not be made narrower.
+
+### Changed
+
+- The picker opens 600 pixels wide until it has been resized.
+
 ## 1.2.1
 
 ### Fixed
