@@ -24,12 +24,11 @@ fn clean_browser_name(name: &str) -> String {
     let suffixes = [" Web Browser", " Browser"];
     let mut cleaned = name.to_string();
     for suffix in &suffixes {
-        if let Some(stripped) = cleaned.strip_suffix(suffix) {
-            if !stripped.is_empty() {
+        if let Some(stripped) = cleaned.strip_suffix(suffix)
+            && !stripped.is_empty() {
                 cleaned = stripped.to_string();
                 break;
             }
-        }
     }
     cleaned
 }

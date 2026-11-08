@@ -45,6 +45,7 @@ pub struct WindowSize {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Default)]
 pub struct Config {
     #[serde(default)]
     pub always_ask: bool,
@@ -64,21 +65,6 @@ pub struct Config {
     pub picker_size: Option<WindowSize>,
 }
 
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            always_ask: false,
-            fallback_browser: None,
-            previous_default_browser: None,
-            rules: Vec::new(),
-            rules_suspended: false,
-            custom_browsers: Vec::new(),
-            browser_overrides: Vec::new(),
-            browser_order: Vec::new(),
-            picker_size: None,
-        }
-    }
-}
 
 /// $XDG_CONFIG_HOME/silo/config.json
 pub fn config_path() -> PathBuf {
