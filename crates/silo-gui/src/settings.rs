@@ -333,8 +333,8 @@ fn show_add_custom_browser_dialog(window: &adw::PreferencesWindow) {
                     let path_str = path.to_string_lossy().to_string();
                     cmd_ref.set_text(&path_str);
                     // Auto-fill name from filename if empty
-                    if name_ref.text().trim().is_empty() {
-                        if let Some(stem) = path.file_stem() {
+                    if name_ref.text().trim().is_empty()
+                        && let Some(stem) = path.file_stem() {
                             let raw = stem.to_string_lossy();
                             // Strip version-like suffixes (e.g. "helium-0.10.7.1-x86_64" -> "Helium")
                             let name = raw.split('-')
@@ -347,7 +347,6 @@ fn show_add_custom_browser_dialog(window: &adw::PreferencesWindow) {
                             };
                             name_ref.set_text(&capitalised);
                         }
-                    }
                 }
         });
     });

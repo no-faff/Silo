@@ -1,5 +1,44 @@
 # Changelog
 
+## 1.2.1
+
+A maintenance release. The main fix is that the release now includes
+the ready-built program again: the 1.2.0 release only had GitHub's
+source code archives, so there was nothing to install without building
+Silo yourself.
+
+- Release download includes the built `silo` binary and install script
+- Clearer "add custom browser" dialog
+- Removed an unused duplicate copy of the GLib library from the build
+- Dependency updates (serde, serde_json, configparser, dirs)
+- Automated security scanning (CodeQL) and dependency update checks
+  (Dependabot) on the repository
+- Small code tidy-ups, no change in behaviour
+
+## 1.2.0
+
+**Local files**
+- Silo now handles local file paths and `file://` links (for example
+  from VS Code's "Open in External App"). The picker shows the file
+  type, and a new `ext:` rule pattern lets you pick a browser per file
+  type
+
+**Picker**
+- Once and Always buttons: open a link just this once, or save a rule
+  for that site
+- Silo no longer lists itself as a browser option
+- Default picker height fits nine rows
+
+**Settings**
+- Reorder browsers with the arrow buttons
+- Reorder rules to control which one matches first
+- Browser name suffixes are tidied up
+
+**Browser extension**
+- The install script sets up a helper that lets the Silo Firefox
+  extension talk to Silo directly, rather than relying on the system's
+  default browser setting
+
 ## 1.1.0
 
 A large release that brings Silo to feature parity with BrowserPicker

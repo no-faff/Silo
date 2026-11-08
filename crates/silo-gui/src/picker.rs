@@ -167,14 +167,14 @@ pub fn show(
                 .label("Always")
                 .css_classes(["picker-btn", "always-btn"])
                 .valign(gtk::Align::Center)
-                .tooltip_text(&format!("Always open {} in {}", tooltip_target, entry.display_name))
+                .tooltip_text(format!("Always open {} in {}", tooltip_target, entry.display_name))
                 .build();
 
             let once_btn = gtk::Button::builder()
                 .label("Once")
                 .css_classes(["picker-btn", "once-btn"])
                 .valign(gtk::Align::Center)
-                .tooltip_text(&format!("Open in {}", entry.display_name))
+                .tooltip_text(format!("Open in {}", entry.display_name))
                 .build();
 
             row.add_suffix(&always_btn);
